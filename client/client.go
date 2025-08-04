@@ -9,7 +9,7 @@ import (
 func StartClient(address string) {
 	conn, err := net.Dial("tcp", address)
 	if err != nil {
-		fmt.Println("COnnection error:", err)
+		fmt.Println("Connection error:", err)
 		return
 	}
 	defer conn.Close()

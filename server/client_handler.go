@@ -6,6 +6,7 @@ import (
 	"net"
 	"net-cat/models"
 	"strings"
+	"time"
 )
 
 func HandleClient(conn net.Conn) {
@@ -26,8 +27,9 @@ func HandleClient(conn net.Conn) {
 		name = strings.TrimSpace(input)
 
 		// validate name is not empty
-		if name == "" {
-			conn.Write([]byte("Name cannot be empty. Please try again.\n"))
+		if name == "" || strings.ContainsFunc(name, func(r rune) bool {
+			return r != 10 && (r < 32 || r == 127)
+		}) {
 			continue
 		}
 
@@ -74,7 +76,8 @@ func HandleClient(conn net.Conn) {
 	Broadcast(joinMsg, conn)
 
 	// send prompt for first message
-	conn.Write([]byte(fmt.Sprintf("[%s]: ", name)))
+	m := time.Now().Format("2006-01-02 15:04:04")
+	conn.Write([]byte(fmt.Sprintf("[%s][%s]:", m, name)))
 
 	// handle messages
 	for {
@@ -83,18 +86,27 @@ func HandleClient(conn net.Conn) {
 			break
 		}
 		msg = strings.TrimSpace(msg)
-		if msg == "" {
-			// send prompt again for empty messages
-			conn.Write([]byte(fmt.Sprintf("[%s]: ", name)))
+		if msg == "" || strings.ContainsFunc(msg, func(r rune) bool {
+			return r != 10 && (r < 32 || r == 127)
+		}) {
 			continue
 		}
+
+		//if msg.Message == "" || !utf8.ValidString(msg.Message) ||
+		//strings.ContainsFunc(msg.Message, func(r rune) bool {
+		// return !unicode.IsGraphic(r)
+		// }) {
 
 		formatted := FormatMessage(name, msg)
 		SaveMessage(formatted)
 		Broadcast(formatted, conn)
 
 		// send prompt for next message
-		conn.Write([]byte(fmt.Sprintf("[%s]: ", name)))
+		t := time.Now().Format("2006-01-02 15:04:05")
+		conn.Write([]byte(fmt.Sprintf("[%s][%s]:", t, name)))
+
+		// t := time.Now().Format("2006-01-02 15:04:05")
+		// return fmt.Sprintf("[%s][%s]: %s", t, name, msg)
 	}
 
 	// clean up when client disconnects
