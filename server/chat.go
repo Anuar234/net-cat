@@ -16,7 +16,7 @@ var (
 	ClientsMutex = sync.Mutex{}
 )
 
-func Broacast(message string, sender net.Conn) {
+func Broadcast(message string, sender net.Conn) {
 	ClientsMutex.Lock()
 	defer ClientsMutex.Unlock()
 

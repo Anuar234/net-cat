@@ -18,9 +18,9 @@ func StartServer(port string) {
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			log.Print("Error acccepting:", err)
+			log.Print("Error accepting:", err)
 			continue
 		}
-		go HandleCleint(conn)
+		go HandleClient(conn)
 	}
 }
